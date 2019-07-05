@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>PhoneBook</title>
+		<style type="text/css">
+			.flex-conteiner {
+				display:  inline-flex;
+				flex-wrap: wrap;
+			}
+
+			.conteiner {
+				text-align:center;
+                font-size: 1.1em;
+                padding: 1.5em;				
+            }
+
+            #conteiner_add {
+            	text-align:center;
+                font-size: 1.1em;
+                padding: 1.5em;
+            }
+
+            #conteiner_edit{
+            	text-align:center;
+                font-size: 1.1em;
+                padding: 1.5em;
+            }
+
+            #name {
+				margin: 10px;	
+			}
+
+			#edit-name {
+				margin: 10px;
+			}
+
+			.phone {
+				margin: 10px;
+			}
+
+			.phones {
+				display: flex;
+				flex-direction: column;
+			}
+
+			#edit-phone {
+				margin: 10px;
+			}
+
+			#born {
+				margin: 10px;
+			}
+
+			#edit-born {
+				margin: 10px;
+			}
+
+			#avatar {
+				margin: 10px;
+			}
+
+			#edit-avatar {
+				border: 2px solid grey;
+                display: none;
+			}
+
+			#edit {				
+				float: right;
+				margin: 3px;
+				padding: 3px;
+			}
+
+			.edit {
+				border: 2px solid red;
+                display: none;
+			}
+
+			.contact {
+				display: flex;
+				flex-direction: column;
+				margin: 25px;
+				padding: 25px;
+				border: 2px solid green;				
+			}
+
+			.add {
+				top: 250;
+				position: absolute;
+				display: none;
+				float: left;					
+			}
+
+			#addPhone {
+				float: right;
+			}
+
+			#encode {
+				float: right;
+			}
+
+			#change-avatar {
+				margin: 10px;
+			}
+
+			#edit-save {
+				margin: 10px;
+			}
+
+			.happyBirthday {
+				display: inline-flex;;
+				flex-direction: column;
+                border: 2px solid red;
+                margin: 3px;
+				padding: 3px;
+			}
+
+			#foto {
+				height: 30px;
+				width: 30px;
+				margin: 2px;
+				padding: 2px;
+			}
+
+			.abonent {
+				display: flex;
+				margin: 3px;
+				padding: 3px;				
+			}			
+		</style>
+	</head>
+	<body>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>	
+		<h2>Phone book</h2>
+		<h4>enter name or number for search</h4>
+		<div class='happyBirthday'>Birthday today</div>
+		<div class='flex-conteiner'>
+			<div class="conteiner">
+				<button id="new">New</button>			
+				<input  type="text" id="search"> search</input>
+				<div class="contact"></div>						
+			</div>
+			<div id='conteiner_add'>
+				<div class="add">
+					<input type='text' id="name">  name</input>
+					<div class='phones'>
+						<input type='text' class='phone'>number</input>
+						<button id='addPhone'>add phone</button>
+					</div>
+					<input type='date' id="born">  -born</input>
+					<div> load image
+						<input type='file' class="avatar" value='load foto'></input>
+						<button class='encode'>encode</button>
+					</div>			
+					<button id='save'>SAVE</button>
+				</div>
+			</div>			
+			<div id='conteiner_edit'>
+				<div class="edit">				
+					<input type='text' id="edit-name" value="">  name</input>
+					<div>
+						<input type='text' id="edit-phone" value="">number</input>
+					</div>
+					<input type='date' id="edit-born">  -born</input>
+					<button id='change-avatar'>Change avatar</button>
+					<button id='edit-save'>SAVE</button>
+				</div>
+				<div id='edit-avatar'>
+					<input type='file' class="edit-avatar" value='load foto'></input>
+					<button class='edit-encode'>encode</button>
+				</div>
+			</div>			
+		</div>
+		<script>
+			var contacts = [];
+			var dateToday = new Date();
+			var edit_index; // index edit element
+			var avatar_base64 = 'def.png';
+
+			function render() {
+				var elem = {};
+				var phones = [];
+				elem.name = $('#name').val();
+				
+				$('.phone').each(function() {
+					phones.push($(this).val());
+				});
+				elem.phone = phones;
+				elem.born = $('#born').val();
+				elem.avatar = avatar_base64;
+				
+				if (elem.name !== "") {
+					contacts.push(elem);
+					localStorage.phoneBook = JSON.stringify(contacts);
+					$(`<div class='abonent'><img src='${elem.avatar}' id="foto">
+						<span class="el-name">${elem.name}</span> -- <span class="el-phone">
+						${elem.phone}</span><button id="edit">Edit</button></div>`).appendTo(".contact");
+					avatar_base64 = 'def.png';
+					$('.add').hide();	
+				} else {
+					$('.add').hide();
+				}
+			}			
+			// load phone book from Local Storage                
+			if (localStorage.phoneBook) {
+  				var contacts = JSON.parse(localStorage.phoneBook);
+  			}
+  			// render contacts in DOM
+			contacts.forEach(function(el) {
+				$(`<div class='abonent'><img src='${el.avatar}' id="foto">
+					<span class="el-name">${el.name}</span> -- <span class="el-phone">
+					${el.phone}</span><button id="edit">Edit</button></div>`).appendTo(".contact");
+			// birthday check
+				if (el.born.slice(-2) == dateToday.getDate() &&	el.born.slice(5, 7) == dateToday.getMonth() + 1) {
+					$(`<div class='abonent'>${el.name + '--' + el.phone}</div>`).appendTo(".happyBirthday");
+				}
+			});			
+			// create new contact		 			
+			$('#new').click(function() {									
+				$('.add').show();	
+			});
+			// add phone
+			$('#addPhone').click(function() {
+				$('.phones').append("<input type='text' class='phone'></input>");
+			});
+			// add avatar
+			$('.encode').click(function() {
+				var file = $('.avatar')[0].files[0];
+				var reader = new FileReader();
+				reader.readAsDataURL(file);
+				reader.onload = function() {
+					avatar_base64 = reader.result;					
+				}			
+			});
+			// add new contact in phone book
+			$('#save').click(render);						
+			// search contact
+			$('#search').on('input', function() {
+				var myText = $(this).val();
+				var $contact = $('.contact div');
+								
+				$contact.each(function() {
+					if ($(this).text().toLowerCase().includes(myText.toLowerCase())) {
+						$(this).show();
+	  				} else {
+	  					$(this).hide();
+	  				} 			
+  				});	
+			});			
+			// edit contact
+			function edit_render() {				
+				var elem = contacts[edit_index];
+				elem.name = $('#edit-name').val();
+				elem.phone = $('#edit-phone').val();
+				elem.born = $('#edit-born').val();
+				if ($('.edit-avatar').val()) {
+					elem.avatar = avatar_base64;
+				}
+				localStorage.phoneBook = JSON.stringify(contacts);
+				
+				$('.on-edit #foto').attr('src', elem.avatar);							
+				$('.on-edit .el-name').text(elem.name);				
+				$('.on-edit .el-phone').text(elem.phone);
+				$('.on-edit').removeClass('.on-edit');											
+				$('.edit').hide();
+				$('#edit-avatar').hide();					
+			}
+
+			$('.contact').on('click', '#edit', function() {
+				$text = $(this).parent().text().slice(0, -4);
+				$(this).parent().addClass('on-edit');
+				
+				contacts.forEach(function(elem, index) {
+					
+					if ($text.indexOf(elem.name) !== -1) {
+						$('.edit').show();
+						$('#edit-name').attr('value', elem.name);
+						$('#edit-phone').attr('value', elem.phone);
+						$('#edit-born').attr('value', elem.born);
+						edit_index = index;										
+					}
+				});							
+			});
+
+			$('#change-avatar').click(function() {
+				$('#edit-avatar').show();
+			});
+			$('.edit-encode').click(function() {
+				var file = $('.edit-avatar')[0].files[0];
+				var reader = new FileReader();
+				reader.readAsDataURL(file);
+				reader.onload = function() {
+					avatar_base64 = reader.result;					
+				}			
+			});
+			$('#edit-save').click(edit_render);			
+		</script>		
+	</body>
+</html>
